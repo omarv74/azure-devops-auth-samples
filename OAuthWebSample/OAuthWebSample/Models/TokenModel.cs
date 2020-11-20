@@ -18,6 +18,9 @@ namespace OAuthSample.Models
         [DataMember(Name = "expires_in")]
         public int ExpiresIn { get; set; }
 
+        [DataMember(Name = "accounts_json")]
+        public String AccountsJson { get; set; }
+
         public bool IsPending { get; set; }
     }
 }

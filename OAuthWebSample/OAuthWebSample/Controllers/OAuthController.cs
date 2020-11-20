@@ -18,6 +18,7 @@ namespace OAuthSample.Controllers
     public class OAuthController : Controller
     {
         private static readonly HttpClient s_httpClient = new HttpClient();
+        private static readonly HttpClient s_httpClient2 = new HttpClient();
         private static readonly Dictionary<Guid, TokenModel> s_authorizationRequests = new Dictionary<Guid, TokenModel>();
 
         /// <summary>
@@ -46,10 +47,11 @@ namespace OAuthSample.Controllers
             var queryParams = HttpUtility.ParseQueryString(uriBuilder.Query ?? String.Empty);
 
             queryParams["client_id"] = ConfigurationManager.AppSettings["ClientAppId"];
-            queryParams["response_type"] = "Assertion";
+            queryParams["response_type"] = "Assertion"; // "code"; // "idtoken"; // "code idtoken"
             queryParams["state"] = state;
             queryParams["scope"] = ConfigurationManager.AppSettings["Scope"];
             queryParams["redirect_uri"] = ConfigurationManager.AppSettings["CallbackUrl"];
+            // queryParams["nonce"] = <Random Value>
 
             uriBuilder.Query = queryParams.ToString();
 
@@ -159,11 +161,16 @@ namespace OAuthSample.Controllers
         public async Task<ActionResult> RefreshToken(string refreshToken)
         {
             String error = null;
+            String authorizationToken;
+
             if (!String.IsNullOrEmpty(refreshToken))
             {
                 // Form the request to exchange an auth code for an access token and refresh token
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, ConfigurationManager.AppSettings["TokenUrl"]);
                 requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                HttpRequestMessage requestMessage2; // = new HttpRequestMessage(HttpMethod.Get, "https://app.vssps.visualstudio.com/_apis/Accounts");
+                requestMessage2 = new HttpRequestMessage(); // (HttpMethod.Get, "https://app.vssps.visualstudio.com/_apis/Accounts");
+                //requestMessage2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 Dictionary<String, String> form = new Dictionary<String, String>()
                 {
@@ -183,6 +190,53 @@ namespace OAuthSample.Controllers
                     // Handle successful request
                     String body = await responseMessage.Content.ReadAsStringAsync();
                     ViewBag.Token = JObject.Parse(body).ToObject<TokenModel>();
+                    authorizationToken = ViewBag.Token.AccessToken;
+
+                    //s_httpClient2.BaseAddress = new Uri("https://app.vssps.visualstudio.com/_apis/Accounts"); //new Uri("https://adooauthclientsample.azurewebsites.net/");
+                    //s_httpClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
+                    //HttpResponseMessage responseMessage2 = await s_httpClient.GetAsync("api/WebApi").ConfigureAwait(false);
+                    //if (responseMessage2.IsSuccessStatusCode != true)
+                    //{
+                    //    throw new ApplicationException("ERROR occurred getting list of accounts.");
+                    //}
+                    //else
+                    //{
+                    //    String accountsList = await responseMessage2.Content.ReadAsStringAsync();
+                    //    ViewBag.Token.AccountsJson = accountsList;
+                    //}
+
+                    // use the httpclient
+                    using (var client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("https://app.vssps.visualstudio.com/"); // new Uri("https://dev.azure.com/adoadmin-org1/");
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                        client.DefaultRequestHeaders.Add("User-Agent", "VstsRestApiSamples");
+                        client.DefaultRequestHeaders.Add("X-TFS-FedAuthRedirect", "Suppress");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
+
+                        // connect to the REST endpoint            
+                        //HttpResponseMessage response = client.GetAsync("_apis/projects?stateFilter=All&api-version=2.2").Result;
+                        //HttpResponseMessage response = client.GetAsync("_apis/projects").Result;
+                        HttpResponseMessage response = client.GetAsync("_apis/Accounts").Result;
+
+                        // check to see if we have a succesfull respond
+                        if (response.IsSuccessStatusCode)
+                        {
+                            //Console.WriteLine("\tSuccesful REST call");
+                            //Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+                            ViewBag.Token.AccountsJson = response.Content.ReadAsStringAsync().Result;
+                        }
+                        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        {
+                            throw new UnauthorizedAccessException();  //ApplicationException("ERROR occurred getting list of accounts.");
+                        }
+                        else
+                        {
+                            //Console.WriteLine("{0}:{1}", response.StatusCode, response.ReasonPhrase);
+                            throw new ApplicationException(String.Format("APPLICATION ERROR: {0} - {1}", response.StatusCode.ToString(), response.ReasonPhrase.ToString()));
+                        }
+                    }
                 }
                 else
                 {

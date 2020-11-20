@@ -10,7 +10,7 @@
 <div class="jumbotron">
     <h1>Azure DevOps OAuth Client Sample</h1>
     <p class="lead">This app shows how to authorize a user to authorize an app and then to request an access token to access Azure DevOps on their behalf.</p>
-    <p><a href="/oauth/requesttoken" class="btn btn-primary btn-large"  >Authorize &raquo;</a></p>
+    <p><a href="@Url.Action("Authorize", "OAuth")" class="btn btn-primary btn-large">Authorize &raquo;</a></p>
 </div>
 
 <div class="row">
@@ -33,6 +33,7 @@
     <div class="col-md-4">
         <h2>Learn about auth in Azure DevOps</h2>
         <p>Azure DevOps supports authorization via OAuth 2.0. Learn more about how you can develop apps that securely access your user's Azure DevOps projects and perform tasks on their behalf.</p>
-        <p><a class="btn btn-default" href="https://docs.microsoft.com/en-us/vsts/integrate/get-started/authentication/oauth?view=vsts">Learn more &raquo;</a></p>
+        @*<p><a class="btn btn-default" href="https://docs.microsoft.com/en-us/vsts/integrate/get-started/authentication/oauth?view=vsts">Learn more &raquo;</a></p>*@
+        <p><a class="btn btn-default" href="/Home/About">Learn more &raquo;</a></p>
     </div>
 </div>

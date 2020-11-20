@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2050
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientLibraryConsoleAppSample", "ClientLibraryConsoleAppSample\ClientLibraryConsoleAppSample.csproj", "{A5A280A5-8062-4295-96F3-8AE56CA8E02A}"
 EndProject
@@ -16,6 +16,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NonInteractivePatGenerationSample", "NonInteractivePatGenerationSample\NonInteractivePatGenerationSample\NonInteractivePatGenerationSample.csproj", "{CA5640B9-E5A9-43EF-A1F2-3AE427D4206F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuthWebSample", "OAuthWebSample\OAuthWebSample\OAuthWebSample.csproj", "{10FD671B-847F-4619-82FA-744D1A4CC566}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AF41ABB5-400D-4972-8AAD-BA649BEA3ECB}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\TriggerADoGovernanceFlow.ps1 = Scripts\TriggerADoGovernanceFlow.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
